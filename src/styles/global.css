@@ -1,0 +1,108 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+---------- THEME VARIABLES ----------
+:root {
+  --paper: #f5f2e9;
+  --paper-soft: #f0ece1;
+  --ink: #1c1917;
+  --dim: #6b6259;
+  --line: #1c1917;
+  --soft: #e7e3d8;
+  --amber: #fff7e0;
+  --amber-ink: #b45309;
+  --row-line: #ccc7b7;
+}
+
+html.dark {
+  --paper: #171513;
+  --paper-soft: #201d19;
+  --ink: #ece7dc;
+  --dim: #a89d8c;
+  --line: #ece7dc;
+  --soft: #2a2620;
+  --amber: #3a2f14;
+  --amber-ink: #f4b860;
+  --row-line: #38332a;
+}
+
+/* ---------- BASE ---------- */
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  transition: background 0.2s, color 0.2s;
+}
+
+[hidden] { display: none !important; }
+
+/* ---------- NUMERIC COLUMN: KHÔNG XUỐNG DÒNG ---------- */
+td.num, th.num { white-space: nowrap; }
+
+/* ---------- ATTACHMENT COLUMNS ---------- */
+td.fits { max-width: 340px; font-size: 11px; line-height: 1.5; }
+td.note-wide { max-width: 480px; font-size: 12px; line-height: 1.5; }
+
+/* ---------- AMMO CARD COLORS ---------- */
+.ammo-9x19      { background: #fef3c7; border-color: #eab308; }
+.ammo-45        { background: #fed7aa; border-color: #f97316; }
+.ammo-50        { background: #fecaca; border-color: #dc2626; }
+.ammo-38        { background: #fef3c7; border-color: #fbbf24; }
+.ammo-357       { background: #fdba74; border-color: #ea580c; }
+.ammo-44        { background: #fca5a5; border-color: #b91c1c; }
+.ammo-556x45    { background: #d9f99d; border-color: #65a30d; }
+.ammo-223       { background: #bbf7d0; border-color: #16a34a; }
+.ammo-545x39    { background: #a7f3d0; border-color: #059669; }
+.ammo-762x39    { background: #99f6e4; border-color: #0d9488; }
+.ammo-762x51    { background: #a5f3fc; border-color: #0891b2; }
+.ammo-762x54    { background: #bae6fd; border-color: #0284c7; }
+.ammo-3006      { background: #bfdbfe; border-color: #2563eb; }
+.ammo-308       { background: #c7d2fe; border-color: #4f46e5; }
+.ammo-9x39      { background: #e9d5ff; border-color: #9333ea; }
+.ammo-12g       { background: #fecdd3; border-color: #e11d48; }
+.ammo-40mm      { background: #f5d0fe; border-color: #c026d3; }
+
+html.dark .ammo-9x19    { background: #4a3a10; border-color: #eab308; color: #fef3c7; }
+html.dark .ammo-45      { background: #4a2d12; border-color: #f97316; color: #ffedd5; }
+html.dark .ammo-50      { background: #4a1a1a; border-color: #dc2626; color: #fee2e2; }
+html.dark .ammo-38      { background: #4a3a10; border-color: #fbbf24; color: #fef3c7; }
+html.dark .ammo-357     { background: #4a2810; border-color: #ea580c; color: #ffedd5; }
+html.dark .ammo-44      { background: #4a1f1f; border-color: #b91c1c; color: #fee2e2; }
+html.dark .ammo-556x45  { background: #2a3a10; border-color: #65a30d; color: #ecfccb; }
+html.dark .ammo-223     { background: #163a1e; border-color: #16a34a; color: #dcfce7; }
+html.dark .ammo-545x39  { background: #0f3a2a; border-color: #059669; color: #d1fae5; }
+html.dark .ammo-762x39  { background: #0f3a37; border-color: #0d9488; color: #ccfbf1; }
+html.dark .ammo-762x51  { background: #0f3340; border-color: #0891b2; color: #cffafe; }
+html.dark .ammo-762x54  { background: #0f2c40; border-color: #0284c7; color: #e0f2fe; }
+html.dark .ammo-3006    { background: #152a4a; border-color: #2563eb; color: #dbeafe; }
+html.dark .ammo-308     { background: #1e1f4a; border-color: #4f46e5; color: #e0e7ff; }
+html.dark .ammo-9x39    { background: #2e1a4a; border-color: #9333ea; color: #f3e8ff; }
+html.dark .ammo-12g     { background: #4a1a24; border-color: #e11d48; color: #ffe4e6; }
+html.dark .ammo-40mm    { background: #3a1240; border-color: #c026d3; color: #fae8ff; }
+
+/* ---------- DARK OVERRIDES CHO TAILWIND CLASS ---------- */
+html.dark .bg-white       { background: #201d19 !important; }
+html.dark .bg-stone-100   { background: #201d19 !important; }
+html.dark .bg-stone-200   { background: #2a2620 !important; }
+html.dark .bg-stone-800   { background: #ece7dc !important; color: #171513 !important; }
+html.dark .text-stone-50  { color: #171513 !important; }
+html.dark .text-stone-900 { color: #ece7dc !important; }
+html.dark .text-stone-600 { color: #a89d8c !important; }
+html.dark .text-stone-500 { color: #8b8275 !important; }
+html.dark .text-stone-400 { color: #6b6259 !important; }
+html.dark .border-stone-300 { border-color: #a09c96 !important; }
+html.dark .border-stone-400 { border-color: #4a443a !important; }
+html.dark .border-stone-500 { border-color: #5a544a !important; }
+html.dark .border-stone-800 { border-color: #ece7dc !important; }
+html.dark .bg-amber-50    { background: #3a2f14 !important; }
+html.dark .bg-amber-100   { background: #3a2f14 !important; }
+html.dark .text-amber-600 { color: #f4b860 !important; }
+html.dark .bg-stone-300   { background: #38332a !important; }
+html.dark .bg-stone-700   { background: #d6cfc0 !important; }
+html.dark .hover\:bg-stone-300:hover { background: #38332a !important; }
+html.dark .hover\:bg-stone-700:hover { background: #d6cfc0 !important; }
+html.dark input, html.dark select {
+  background: #201d19 !important;
+  color: #ece7dc !important;
+  border-color: #5a544a !important;
+}

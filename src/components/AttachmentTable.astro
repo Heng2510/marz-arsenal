@@ -1,0 +1,60 @@
+---
+import { ATTACHMENTS } from '../data/attachments';
+const sorted = [...ATTACHMENTS].sort((a, b) => a.name.localeCompare(b.name));
+---
+<div class="border-2 border-stone-800 dark:border-stone-200 bg-stone-100 dark:bg-stone-900 p-3 mb-4 flex flex-wrap gap-3 items-end text-sm">
+  <label class="flex flex-col text-xs flex-1 min-w-[200px]">
+    <span class="font-bold uppercase mb-1">Search</span>
+    <input id="a-q" type="text" placeholder="Search attachment…" class="border border-stone-500 px-2 py-1 w-full" />
+  </label>
+  <div class="text-xs ml-auto">
+    Showing <b id="a-count" class="mx-1">0</b> of <b class="mx-1">{ATTACHMENTS.length}</b>
+  </div>
+</div>
+
+<div class="overflow-x-auto border-2 border-stone-800 dark:border-stone-200">
+  <table class="w-full text-sm border-collapse">
+    <thead class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900">
+      <tr>
+        <th class="p-2 text-left">Attachment</th>
+        <th class="p-2 text-left">Type</th>
+        <th class="p-2 text-right">Wt</th>
+        <th class="p-2 text-left">Fits on</th>
+        <th class="p-2 text-left">Notes</th>
+      </tr>
+    </thead>
+    <tbody id="attach-tbody">
+      {sorted.map(a => (
+        <tr class="border-b border-stone-300 dark:border-stone-700 align-top"
+            data-name={a.name.toLowerCase()}>
+          <td class="p-2 font-bold">{a.name}</td>
+          <td class="p-2 text-xs uppercase text-stone-600 dark:text-stone-400">{a.type}</td>
+          <td class="p-2 num text-right font-mono">{a.weight}</td>
+          <td class="p-2 fits text-stone-700 dark:text-stone-300">
+            {a.fitsOn === 'universal'
+              ? <span class="italic text-stone-500 dark:text-stone-400">Universal rail</span>
+              : a.fitsOn.join(', ')}
+          </td>
+          <td class="p-2 note-wide text-stone-600 dark:text-stone-400 italic">{a.note ?? ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const q = document.getElementById('a-q') as HTMLInputElement;
+  const count = document.getElementById('a-count')!;
+  function filter() {
+    const v = q.value.trim().toLowerCase();
+    let n = 0;
+    document.querySelectorAll<HTMLTableRowElement>('#attach-tbody tr').forEach(tr => {
+      const ok = !v || (tr.dataset.name || '').includes(v);
+      tr.hidden = !ok;
+      if (ok) n++;
+    });
+    count.textContent = String(n);
+  }
+  q?.addEventListener('input', filter);
+  filter();
+</script>

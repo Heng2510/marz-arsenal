@@ -1,0 +1,41 @@
+---
+const tabs = [
+  { id: 'guns',        label: 'GUNS' },
+  { id: 'ammo',        label: 'AMMO' },
+  { id: 'attachments', label: 'ATTACHMENTS' },
+  { id: 'ranking',     label: 'RANKING' },
+];
+---
+<div class="flex justify-center gap-1.5 border-b-2 border-stone-800 dark:border-stone-200 mb-6">
+  {tabs.map((t, i) => (
+    <button data-tab={t.id}
+      class:list={[
+        'px-6 py-2 font-bold uppercase tracking-wider text-sm border-t-2 border-x-2 border-stone-800 dark:border-stone-200 transition',
+        i === 0
+          ? 'bg-stone-800 text-stone-50 dark:bg-stone-200 dark:text-stone-900'
+          : 'bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700'
+      ]}>
+      {t.label}
+    </button>
+  ))}
+</div>
+
+<script>
+  const btns = document.querySelectorAll<HTMLButtonElement>('[data-tab]');
+  const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
+  btns.forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.tab!;
+    btns.forEach(b => {
+      const active = b.dataset.tab === id;
+      b.classList.toggle('bg-stone-800', active);
+      b.classList.toggle('text-stone-50', active);
+      b.classList.toggle('dark:bg-stone-200', active);
+      b.classList.toggle('dark:text-stone-900', active);
+      b.classList.toggle('bg-stone-200', !active);
+      b.classList.toggle('dark:bg-stone-800', !active);
+      b.classList.toggle('hover:bg-stone-300', !active);
+      b.classList.toggle('dark:hover:bg-stone-700', !active);
+    });
+    panels.forEach(p => { p.hidden = p.dataset.panel !== id; });
+  }));
+</script>

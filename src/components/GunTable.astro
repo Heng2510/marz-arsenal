@@ -1,0 +1,257 @@
+---
+import { GUNS } from "../data/guns";
+import { AMMO_INFO } from "../data/ammo";
+
+// Preserve original order so we can reset sorting (3rd click on a header).
+const original = [...GUNS].sort(
+  (a, b) =>
+    a.category.localeCompare(b.category) || a.name.localeCompare(b.name),
+);
+
+// Columns that can be sorted. `type` decides numeric vs text comparison.
+const columns = [
+  { key: "best", label: "★", type: "text", cls: "text-left" },
+  { key: "name", label: "Gun", type: "text", cls: "text-left" },
+  { key: "category", label: "Type", type: "text", cls: "text-left" },
+  { key: "ammo", label: "Ammo", type: "text", cls: "text-left" },
+  { key: "dmgMax", label: "DMG", type: "num", cls: "text-right" },
+  { key: "crit", label: "Crit%", type: "num", cls: "text-right" },
+  { key: "critDmg", label: "Crit×", type: "num", cls: "text-right" },
+  { key: "hitChance", label: "Hit", type: "num", cls: "text-right" },
+  { key: "aimTime", label: "Aim", type: "num", cls: "text-right" },
+  { key: "range", label: "Range", type: "num", cls: "text-right" },
+  { key: "noise", label: "Noise", type: "num", cls: "text-right" },
+  { key: "mag", label: "Mag", type: "num", cls: "text-right" },
+  { key: "weight", label: "Wt", type: "num", cls: "text-right" },
+  { key: "fireModes", label: "Fire", type: "text", cls: "text-left" },
+  { key: "mounts", label: "Required", type: "text", cls: "text-left" },
+];
+---
+
+<div class="overflow-x-auto border-2 border-stone-800 dark:border-stone-200">
+  <table class="w-full text-sm border-collapse table-fixed">
+    <!-- Fixed column widths prevent "Required" from pushing other columns -->
+    <colgroup>
+      <col style="width:32px" />
+      <col style="width:150px" />
+      <col style="width:80px" />
+      <col style="width:170px" />
+      <col style="width:90px" />
+      <col style="width:60px" />
+      <col style="width:60px" />
+      <col style="width:55px" />
+      <col style="width:55px" />
+      <col style="width:65px" />
+      <col style="width:65px" />
+      <col style="width:50px" />
+      <col style="width:50px" />
+      <col style="width:120px" />
+      <col />
+    </colgroup>
+
+    <thead
+      class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900"
+    >
+      <tr>
+        {
+          columns.map((c) => (
+            <th
+              class:list={[
+                "p-2 cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300",
+                c.cls,
+              ]}
+              data-sort-key={c.key}
+              data-sort-type={c.type}
+            >
+              <span class="inline-flex items-center gap-1">
+                {c.label}
+                <span
+                  class="sort-icon text-[10px] opacity-40"
+                  data-icon-for={c.key}
+                >
+                  ▼
+                </span>
+              </span>
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody id="guns-tbody">
+      {
+        original.map((g) => {
+          const ammo = g.ammo ? AMMO_INFO[g.ammo] : null;
+          const mounts = g.mounts ?? [];
+          return (
+            <tr
+              class:list={[
+                "border-b border-stone-300 dark:border-stone-700",
+                g.best && "bg-amber-50 dark:bg-amber-900/30",
+              ]}
+              data-ammo={g.ammo ?? ""}
+              data-cat={g.category}
+              data-name={g.name}
+            >
+              <td class="p-2 text-amber-600 dark:text-amber-400 font-bold">
+                {g.best ? "★" : ""}
+              </td>
+              <td class="p-2 font-bold">{g.name}</td>
+              <td class="p-2 text-xs uppercase text-stone-600 dark:text-stone-400">
+                {g.category}
+              </td>
+              <td class="p-2">
+                {ammo ? (
+                  <span
+                    class:list={[
+                      "px-2 py-0.5 text-xs border rounded whitespace-nowrap",
+                      `ammo-${g.ammo}`,
+                    ]}
+                  >
+                    {ammo.label}
+                  </span>
+                ) : (
+                  <span class="text-stone-400 italic">—</span>
+                )}
+              </td>
+              <td class="p-2 num text-right font-mono">
+                {g.dmgMin.toFixed(2)}–{g.dmgMax.toFixed(2)}
+              </td>
+              <td class="p-2 num text-right font-mono">{g.crit}</td>
+              <td class="p-2 num text-right font-mono">{g.critDmg}</td>
+              <td class="p-2 num text-right font-mono">{g.hitChance}</td>
+              <td class="p-2 num text-right font-mono">{g.aimTime}</td>
+              <td class="p-2 num text-right font-mono">{g.range}</td>
+              <td class="p-2 num text-right font-mono">{g.noise}</td>
+              <td class="p-2 num text-right font-mono">{g.mag}</td>
+              <td class="p-2 num text-right font-mono">{g.weight}</td>
+              <td class="p-2 text-xs">{g.fireModes}</td>
+              <td class="p-2 text-xs">
+                {mounts.length === 0 ? (
+                  <span class="text-stone-400 italic">—</span>
+                ) : (
+                  <div class="flex flex-wrap gap-1">
+                    {mounts.map((m) => (
+                      <span class="px-1.5 py-0.5 bg-stone-200 dark:bg-stone-700 border border-stone-400 dark:border-stone-600 rounded text-[10px] font-mono break-all">
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </td>
+            </tr>
+          );
+        })
+      }
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // ---------- SORTING ----------
+  // 3-click cycle: asc → desc → reset to original order.
+  const tbody = document.getElementById("guns-tbody")!;
+  const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>("tr"));
+  rows.forEach((tr, i) => {
+    tr.dataset.origIndex = String(i);
+  });
+
+  // Column key → cell index (must match the order in the table markup)
+  const colIndex: Record<string, number> = {
+    best: 0,
+    name: 1,
+    category: 2,
+    ammo: 3,
+    dmgMax: 4,
+    crit: 5,
+    critDmg: 6,
+    hitChance: 7,
+    aimTime: 8,
+    range: 9,
+    noise: 10,
+    mag: 11,
+    weight: 12,
+    fireModes: 13,
+    mounts: 14,
+  };
+
+  function getValue(
+    tr: HTMLTableRowElement,
+    key: string,
+    type: string,
+  ): string | number {
+    const idx = colIndex[key];
+    const cell = tr.children[idx] as HTMLTableCellElement;
+    const raw = (cell.textContent || "").trim();
+
+    if (key === "ammo") return tr.dataset.ammo || "";
+    if (key === "dmgMax") {
+      // Cell reads "0.50–1.00"; sort by the max value
+      const parts = raw.split("–");
+      return parseFloat(parts[1]) || 0;
+    }
+    if (type === "num") return parseFloat(raw) || 0;
+    return raw.toLowerCase();
+  }
+
+  const sortState: Record<string, 0 | 1 | 2> = {};
+  let currentKey: string | null = null;
+
+  function updateIcons() {
+    document.querySelectorAll<HTMLElement>("[data-icon-for]").forEach((el) => {
+      const key = el.dataset.iconFor!;
+      const state = key === currentKey ? sortState[key] || 0 : 0;
+      if (state === 1) {
+        el.textContent = "▲";
+        el.style.opacity = "1";
+      } else if (state === 2) {
+        el.textContent = "▼";
+        el.style.opacity = "1";
+      } else {
+        el.textContent = "▼";
+        el.style.opacity = "0.4";
+      }
+    });
+  }
+
+  function sortBy(key: string, type: string, dir: 1 | -1) {
+    rows.sort((a, b) => {
+      const va = getValue(a, key, type);
+      const vb = getValue(b, key, type);
+      if (typeof va === "number" && typeof vb === "number")
+        return (va - vb) * dir;
+      return String(va).localeCompare(String(vb)) * dir;
+    });
+    rows.forEach((r) => tbody.appendChild(r));
+  }
+
+  function resetOrder() {
+    rows.sort(
+      (a, b) => Number(a.dataset.origIndex) - Number(b.dataset.origIndex),
+    );
+    rows.forEach((r) => tbody.appendChild(r));
+  }
+
+  document
+    .querySelectorAll<HTMLTableCellElement>("[data-sort-key]")
+    .forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sortKey!;
+        const type = th.dataset.sortType!;
+
+        if (currentKey && currentKey !== key) sortState[currentKey] = 0;
+
+        const cur = sortState[key] || 0;
+        const next: 0 | 1 | 2 = cur === 0 ? 1 : cur === 1 ? 2 : 0;
+        sortState[key] = next;
+        currentKey = key;
+
+        if (next === 0) {
+          resetOrder();
+          currentKey = null;
+        } else {
+          sortBy(key, type, next === 1 ? 1 : -1);
+        }
+        updateIcons();
+      });
+    });
+</script>

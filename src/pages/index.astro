@@ -1,11 +1,223 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import '../styles/global.css';
+import Base from '../layouts/Base.astro';
+import Tabs from '../components/Tabs.astro';
+import FilterBar from '../components/FilterBar.astro';
+import GunTable from '../components/GunTable.astro';
+import AttachmentTable from '../components/AttachmentTable.astro';
+import { GUNS } from '../data/guns';
+import { AMMO_INFO } from '../data/ammo';
+import { GUN_META } from '../data/gun-meta';
+import { SCORED_GUNS, PROFILES } from '../lib/scoring';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Pre-computed scored guns (includes per-profile score + global rank)
+const scoredGuns = SCORED_GUNS;
+const profiles = PROFILES;
+
+// Ammo grouping for the Ammo tab
+const byAmmo: Record<string, string[]> = {};
+for (const g of GUNS) {
+  if (!g.ammo) continue;
+  (byAmmo[g.ammo] ??= []).push(g.name);
+}
+
+const categories = [...new Set(GUNS.map(g => g.category))].sort();
+const ammoKeys = Object.keys(AMMO_INFO);
 ---
+<Base title="Marz Arsenal">
+  <Tabs />
 
-<Layout>
-	<Welcome />
-</Layout>
+  <!-- ============ GUNS ============ -->
+  <section data-panel="guns">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="text-2xl font-black uppercase">Guns ({GUNS.length})</h2>
+      <div class="text-xs italic text-stone-600 dark:text-stone-400">★ = best choice · Click header to sort</div>
+    </div>
+    <FilterBar />
+    <GunTable />
+  </section>
+
+  <!-- ============ AMMO ============ -->
+  <section data-panel="ammo" hidden>
+    <h2 class="text-2xl font-black uppercase mb-4">Grouped by Ammo</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {Object.entries(byAmmo).sort().map(([key, guns]) => {
+        const info = AMMO_INFO[key as keyof typeof AMMO_INFO];
+        return (
+          <div class:list={['border-2 p-4', `ammo-${key}`]}>
+            <h3 class="font-black text-lg">{info.label}</h3>
+            <p class="text-xs mt-1">{guns.length} guns</p>
+            <ul class="text-sm mt-2 list-disc list-inside">{guns.map(n => <li>{n}</li>)}</ul>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+  <!-- ============ ATTACHMENTS ============ -->
+  <section data-panel="attachments" hidden>
+    <h2 class="text-2xl font-black uppercase mb-4">Attachments</h2>
+    <AttachmentTable />
+  </section>
+
+  <!-- ============ RANKING ============ -->
+  <section data-panel="ranking" hidden>
+    <div class="mb-4">
+      <h2 class="text-2xl font-black uppercase">Ranking ({scoredGuns.length})</h2>
+      <p class="text-xs italic text-stone-600 dark:text-stone-400 mt-1">
+        Ranked by the selected profile. Filters do not change global rank.
+      </p>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="border-2 border-stone-800 dark:border-stone-200 bg-stone-100 dark:bg-stone-900 p-3 mb-4 flex flex-wrap gap-3 items-end text-sm">
+      <label class="flex flex-col text-xs">
+        <span class="font-bold uppercase mb-1">Profile</span>
+        <select id="r-profile" class="border border-stone-500 px-2 py-1 min-w-[140px]">
+          {profiles.map(p => <option value={p.id}>{p.label}</option>)}
+        </select>
+      </label>
+      <label class="flex flex-col text-xs">
+        <span class="font-bold uppercase mb-1">Category</span>
+        <select id="r-cat" class="border border-stone-500 px-2 py-1 min-w-[120px]">
+          <option value="">All</option>
+          {categories.map(c => <option value={c}>{c}</option>)}
+        </select>
+      </label>
+      <label class="flex flex-col text-xs">
+        <span class="font-bold uppercase mb-1">Ammo</span>
+        <select id="r-ammo" class="border border-stone-500 px-2 py-1 min-w-[180px]">
+          <option value="">All</option>
+          {ammoKeys.map(k => <option value={k}>{AMMO_INFO[k as keyof typeof AMMO_INFO].label}</option>)}
+        </select>
+      </label>
+      <label class="flex flex-col text-xs flex-1 min-w-[160px]">
+        <span class="font-bold uppercase mb-1">Search</span>
+        <input id="r-q" type="text" placeholder="Search by name…" class="border border-stone-500 px-2 py-1 w-full" />
+      </label>
+      <div class="text-xs ml-auto">
+        Showing <b id="r-count" class="mx-1">0</b> of <b class="mx-1">{scoredGuns.length}</b>
+      </div>
+    </div>
+
+    <!-- Ranking table -->
+    <div class="overflow-x-auto border-2 border-stone-800 dark:border-stone-200">
+      <table class="w-full text-sm border-collapse">
+        <thead class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900">
+          <tr>
+            <th class="p-2 text-right">#</th>
+            <th class="p-2 text-left">Gun</th>
+            <th class="p-2 text-left">Type</th>
+            <th class="p-2 text-left">Ammo</th>
+            <th class="p-2 text-right">Score</th>
+            <th class="p-2 text-right">Bal. Rank</th>
+            <th class="p-2 text-right">DMG</th>
+            <th class="p-2 text-right">Crit%</th>
+            <th class="p-2 text-right">Range</th>
+            <th class="p-2 text-right">Noise</th>
+            <th class="p-2 text-right">Aim</th>
+            <th class="p-2 text-right">Wt</th>
+            <th class="p-2 text-right">Attach</th>
+          </tr>
+        </thead>
+        <tbody id="rank-tbody">
+          {scoredGuns.map(g => {
+            const ammo = g.ammo ? AMMO_INFO[g.ammo] : null;
+            const meta = GUN_META[g.name] ?? {};
+            return (
+              <tr
+                class:list={['border-b border-stone-300 dark:border-stone-700', g.best && 'bg-amber-50 dark:bg-amber-900/30']}
+                data-name={g.name.toLowerCase()}
+                data-cat={g.category}
+                data-ammo={g.ammo ?? ''}
+                data-scores={JSON.stringify(g.scores)}
+                data-ranks={JSON.stringify(g.globalRanks)}
+              >
+                <td class="p-2 num text-right font-mono font-bold rank-cell">—</td>
+                <td class="p-2 font-bold">{g.best ? '★ ' : ''}{g.name}</td>
+                <td class="p-2 text-xs uppercase text-stone-600 dark:text-stone-400">{g.category}</td>
+                <td class="p-2">
+                  {ammo
+                    ? <span class:list={['px-2 py-0.5 text-xs border rounded whitespace-nowrap', `ammo-${g.ammo}`]}>{ammo.label}</span>
+                    : <span class="text-stone-400 italic">—</span>}
+                </td>
+                <td class="p-2 num text-right font-mono score-cell">—</td>
+                <td class="p-2 num text-right font-mono rank-balanced-cell">—</td>
+                <td class="p-2 num text-right font-mono">{g.dmgMax}</td>
+                <td class="p-2 num text-right font-mono">{g.crit}</td>
+                <td class="p-2 num text-right font-mono">{g.range}</td>
+                <td class="p-2 num text-right font-mono">{g.noise}</td>
+                <td class="p-2 num text-right font-mono">{g.aimTime}</td>
+                <td class="p-2 num text-right font-mono">{g.weight}</td>
+                <td class="p-2 num text-right font-mono">{meta.attachCount ?? 0}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // ---------- RANKING: client-side filter + sort by profile ----------
+  const rProfile = document.getElementById('r-profile') as HTMLSelectElement | null;
+  const rCat     = document.getElementById('r-cat') as HTMLSelectElement | null;
+  const rAmmo    = document.getElementById('r-ammo') as HTMLSelectElement | null;
+  const rQ       = document.getElementById('r-q') as HTMLInputElement | null;
+  const rCount   = document.getElementById('r-count');
+  const tbody    = document.getElementById('rank-tbody');
+
+  function applyRank() {
+    if (!tbody || !rCount) return;
+    const profile = rProfile?.value ?? 'balanced';
+    const cat     = rCat?.value ?? '';
+    const ammo    = rAmmo?.value ?? '';
+    const q       = (rQ?.value ?? '').trim().toLowerCase();
+
+    const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+
+    // Sort rows by score of the selected profile (descending)
+    rows.sort((a, b) => {
+      const sa = JSON.parse(a.dataset.scores || '{}')[profile] ?? 0;
+      const sb = JSON.parse(b.dataset.scores || '{}')[profile] ?? 0;
+      return sb - sa;
+    });
+
+    let visible = 0;
+    for (const tr of rows) {
+      const scores = JSON.parse(tr.dataset.scores || '{}');
+      const ranks  = JSON.parse(tr.dataset.ranks  || '{}');
+
+      const ok = (!cat  || tr.dataset.cat  === cat)
+              && (!ammo || tr.dataset.ammo === ammo)
+              && (!q    || (tr.dataset.name || '').includes(q));
+      tr.hidden = !ok;
+
+      // "#" column = global rank for the current profile (never resets on filter)
+      const rankCell = tr.querySelector('.rank-cell') as HTMLElement;
+      if (rankCell) rankCell.textContent = String(ranks[profile] ?? '—');
+
+      // Profile score cell (multiplied by 100 for readability)
+      const scoreCell = tr.querySelector('.score-cell') as HTMLElement;
+      if (scoreCell) {
+        const s = scores[profile] ?? 0;
+        scoreCell.textContent = (s * 100).toFixed(1);
+      }
+
+      // Balanced rank column is static — useful as a reference point
+      const balCell = tr.querySelector('.rank-balanced-cell') as HTMLElement;
+      if (balCell) balCell.textContent = String(ranks['balanced'] ?? '—');
+
+      if (ok) visible++;
+      tbody.appendChild(tr);
+    }
+    rCount.textContent = String(visible);
+  }
+
+  rProfile?.addEventListener('change', applyRank);
+  rCat?.addEventListener('change', applyRank);
+  rAmmo?.addEventListener('change', applyRank);
+  rQ?.addEventListener('input', applyRank);
+  applyRank();
+</script>
