@@ -1,6 +1,6 @@
 ---
-import { GUNS } from "../data/guns";
-import { AMMO_INFO } from "../data/ammo";
+import { GUNS } from '../data/guns';
+import { AMMO_INFO } from '../data/ammo';
 
 // Preserve original order so we can reset sorting (3rd click on a header).
 const original = [...GUNS].sort(
@@ -33,9 +33,9 @@ const columns = [
     <!-- Fixed column widths prevent "Required" from pushing other columns -->
     <colgroup>
       <col style="width:32px" />
-      <col style="width:150px" />
+      <col style="width:160px" />
       <col style="width:80px" />
-      <col style="width:170px" />
+      <col style="width:120px" />
       <col style="width:90px" />
       <col style="width:60px" />
       <col style="width:60px" />
@@ -80,7 +80,6 @@ const columns = [
     <tbody id="guns-tbody">
       {
         original.map((g) => {
-          const ammo = g.ammo ? AMMO_INFO[g.ammo] : null;
           const mounts = g.mounts ?? [];
           return (
             <tr
@@ -88,7 +87,7 @@ const columns = [
                 "border-b border-stone-300 dark:border-stone-700",
                 g.best && "bg-amber-50 dark:bg-amber-900/30",
               ]}
-              data-ammo={g.ammo ?? ""}
+              data-ammo={g.ammoFamilies.join(',')}
               data-cat={g.category}
               data-name={g.name}
             >
@@ -100,17 +99,22 @@ const columns = [
                 {g.category}
               </td>
               <td class="p-2">
-                {ammo ? (
-                  <span
-                    class:list={[
-                      "px-2 py-0.5 text-xs border rounded whitespace-nowrap",
-                      `ammo-${g.ammo}`,
-                    ]}
-                  >
-                    {ammo.label}
-                  </span>
-                ) : (
+                {g.ammoFamilies.length === 0 ? (
                   <span class="text-stone-400 italic">—</span>
+                ) : (
+                  <div class="flex flex-wrap gap-1">
+                    {g.ammoFamilies.map((f) => (
+                      <span
+                        class:list={[
+                          "px-2 py-0.5 text-xs border rounded whitespace-nowrap",
+                          AMMO_INFO[f].color,
+                        ]}
+                        title={AMMO_INFO[f].long}
+                      >
+                        {AMMO_INFO[f].label}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </td>
               <td class="p-2 num text-right font-mono">

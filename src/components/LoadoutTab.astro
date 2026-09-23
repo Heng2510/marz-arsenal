@@ -1,0 +1,664 @@
+---
+import { GUNS } from "../data/guns";
+const eligibleGuns = GUNS.slice().sort((a, b) => a.name.localeCompare(b.name));
+---
+
+<div class="mb-4">
+  <h2 class="text-2xl font-black uppercase">Loadout Simulator</h2>
+  <p class="text-xs italic text-stone-600 dark:text-stone-400 mt-1">
+    Pick a gun, attach parts, see the effective stats. Values are <b
+      >estimated</b
+    > from mod Lua files.
+  </p>
+</div>
+
+<!-- ============ SUB-TABS ============ -->
+<div class="flex gap-1 mb-4 border-b border-stone-400 dark:border-stone-600">
+  <button
+    data-subtab="single"
+    class="subtab-btn px-4 py-1.5 text-xs font-bold uppercase tracking-wider border border-b-0 border-stone-800 dark:border-stone-200 bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900"
+  >
+    Single
+  </button>
+  <button
+    data-subtab="compare"
+    class="subtab-btn px-4 py-1.5 text-xs font-bold uppercase tracking-wider border border-b-0 border-stone-800 dark:border-stone-200 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700"
+  >
+    Compare
+  </button>
+</div>
+
+<!-- ============ SINGLE MODE ============ -->
+<div data-subpanel="single">
+  <div
+    class="border-2 border-stone-800 dark:border-stone-200 bg-stone-100 dark:bg-stone-900 p-3 mb-4 flex flex-wrap gap-3 items-end text-sm"
+  >
+    <label class="flex flex-col text-xs">
+      <span class="font-bold uppercase mb-1">Gun</span>
+      <select
+        id="lo-gun"
+        class="border border-stone-500 px-2 py-1 min-w-[220px]"
+      >
+        {
+          eligibleGuns.map((g) => (
+            <option value={g.name}>
+              {g.name} — {g.category}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+    <button
+      id="lo-clear"
+      class="px-4 py-1 border border-stone-800 dark:border-stone-200 text-xs font-bold uppercase hover:bg-stone-200 dark:hover:bg-stone-800"
+    >
+      Clear attachments
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-1 border-2 border-stone-800 dark:border-stone-200">
+      <div
+        class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900 px-3 py-2 text-xs font-bold uppercase tracking-wider"
+      >
+        Available attachments
+      </div>
+      <div id="lo-list" class="max-h-[600px] overflow-y-auto p-2 text-xs"></div>
+    </div>
+
+    <div class="lg:col-span-2">
+      <div id="lo-warnings" class="mb-2 text-xs"></div>
+      <div
+        class="overflow-x-auto border-2 border-stone-800 dark:border-stone-200"
+      >
+        <table class="w-full text-sm border-collapse">
+          <thead
+            class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900"
+          >
+            <tr>
+              <th class="p-2 text-left">Stat</th>
+              <th class="p-2 text-right">Base</th>
+              <th class="p-2 text-right">After</th>
+              <th class="p-2 text-right">Δ</th>
+            </tr>
+          </thead>
+          <tbody id="lo-stats"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-3 text-xs italic text-stone-600 dark:text-stone-400">
+        <b>Note:</b> Attachments in the same slot replace each other. Mount requirements
+        are from mod data.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ COMPARE MODE ============ -->
+<div data-subpanel="compare" hidden>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+    <div class="border-2 border-stone-800 dark:border-stone-200">
+      <div
+        class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900 px-3 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center"
+      >
+        <span>Gun A</span>
+        <button
+          id="cmp-clear-a"
+          class="text-[10px] underline hover:no-underline">clear</button
+        >
+      </div>
+      <div class="p-2">
+        <select
+          id="cmp-gun-a"
+          class="w-full border border-stone-500 px-2 py-1 text-sm mb-2"
+        >
+          {
+            eligibleGuns.map((g) => (
+              <option value={g.name}>
+                {g.name} — {g.category}
+              </option>
+            ))
+          }
+        </select>
+        <div
+          id="cmp-list-a"
+          class="max-h-[400px] overflow-y-auto p-1 text-xs border border-stone-300 dark:border-stone-700"
+        >
+        </div>
+      </div>
+    </div>
+
+    <div class="border-2 border-stone-800 dark:border-stone-200">
+      <div
+        class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900 px-3 py-2 text-xs font-bold uppercase tracking-wider flex justify-between items-center"
+      >
+        <span>Gun B</span>
+        <button
+          id="cmp-clear-b"
+          class="text-[10px] underline hover:no-underline">clear</button
+        >
+      </div>
+      <div class="p-2">
+        <select
+          id="cmp-gun-b"
+          class="w-full border border-stone-500 px-2 py-1 text-sm mb-2"
+        >
+          {
+            eligibleGuns.map((g) => (
+              <option value={g.name}>
+                {g.name} — {g.category}
+              </option>
+            ))
+          }
+        </select>
+        <div
+          id="cmp-list-b"
+          class="max-h-[400px] overflow-y-auto p-1 text-xs border border-stone-300 dark:border-stone-700"
+        >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmp-warnings" class="mb-2 text-xs"></div>
+
+  <div class="overflow-x-auto border-2 border-stone-800 dark:border-stone-200">
+    <table class="w-full text-sm border-collapse">
+      <thead
+        class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900"
+      >
+        <tr>
+          <th class="p-2 text-left">Stat</th>
+          <th class="p-2 text-right">Gun A</th>
+          <th class="p-2 text-right">Gun B</th>
+          <th class="p-2 text-right">Δ (B − A)</th>
+        </tr>
+      </thead>
+      <tbody id="cmp-stats"></tbody>
+    </table>
+  </div>
+
+  <div class="mt-3 text-xs italic text-stone-600 dark:text-stone-400">
+    <b>Δ</b> = difference between B and A. Green means B is better, red means B is
+    worse. Lower is better for Weight, Noise, and Aim.
+  </div>
+</div>
+
+<script>
+  import { GUNS } from "../data/guns";
+  import { ATTACHMENTS_EXT } from "../data/attachments-extended";
+  import {
+    computeLoadout,
+    getBaseStats,
+    listInstallableAttachments,
+    listMountOptions,
+    validateLoadout,
+  } from "../lib/loadout";
+
+  // ============ SUB-TAB SWITCHING ============
+  const subtabBtns =
+    document.querySelectorAll<HTMLButtonElement>("[data-subtab]");
+  const subtabPanels =
+    document.querySelectorAll<HTMLElement>("[data-subpanel]");
+  subtabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.subtab!;
+      subtabBtns.forEach((b) => {
+        const active = b.dataset.subtab === id;
+        b.classList.toggle("bg-stone-800", active);
+        b.classList.toggle("dark:bg-stone-200", active);
+        b.classList.toggle("text-stone-50", active);
+        b.classList.toggle("dark:text-stone-900", active);
+        b.classList.toggle("bg-stone-200", !active);
+        b.classList.toggle("dark:bg-stone-800", !active);
+        b.classList.toggle("hover:bg-stone-300", !active);
+        b.classList.toggle("dark:hover:bg-stone-700", !active);
+      });
+      subtabPanels.forEach((p) => {
+        p.hidden = p.dataset.subpanel !== id;
+      });
+    });
+  });
+
+  // ============ SHARED HELPERS ============
+  function findGun(name: string): (typeof GUNS)[number] {
+    return GUNS.find((g) => g.name === name) ?? GUNS[0];
+  }
+
+  function slotOf(name: string): string | null {
+    const ext = ATTACHMENTS_EXT.find((a) => a.name === name);
+    return ext?.slot ?? null;
+  }
+
+  function toggleAttachment(
+    name: string,
+    selected: Set<string>,
+    onRender: () => void,
+  ) {
+    const slot = slotOf(name);
+    if (selected.has(name)) {
+      selected.delete(name);
+      onRender();
+      return;
+    }
+    if (slot) {
+      for (const other of [...selected]) {
+        if (other !== name && slotOf(other) === slot) {
+          selected.delete(other);
+        }
+      }
+    }
+    selected.add(name);
+    onRender();
+  }
+
+  function renderAttachmentList(
+    container: HTMLElement,
+    gun: (typeof GUNS)[number],
+    selected: Set<string>,
+    onRender: () => void,
+  ) {
+    if (!container) return;
+    const options = listInstallableAttachments(gun);
+    const mountOptions = listMountOptions(gun);
+
+    const byCat: Record<string, typeof options> = {};
+    for (const o of options) {
+      (byCat[o.category] ??= []).push(o);
+    }
+
+    let html = "";
+    for (const [cat, items] of Object.entries(byCat).sort()) {
+      html += `<div class="mb-2">
+        <div class="font-bold uppercase text-[10px] tracking-wider text-stone-600 dark:text-stone-400 mb-1">${cat}</div>
+        <div class="flex flex-wrap gap-1">`;
+      for (const o of items) {
+        const isSel = selected.has(o.name);
+        const disabled = !o.canInstallNow && !isSel;
+        const cls = isSel
+          ? "bg-amber-300 dark:bg-amber-800 border-amber-700"
+          : disabled
+            ? "bg-stone-200 dark:bg-stone-800 opacity-40 cursor-not-allowed"
+            : "bg-white dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-stone-700";
+        const title =
+          disabled && o.needsMount
+            ? `Needs mount: ${o.needsMount.join(" or ")}`
+            : `${o.name} (slot: ${o.slot})`;
+        const directMark = o.direct ? " •" : "";
+        html += `<button data-att="${o.name}" ${disabled ? "disabled" : ""}
+          class="px-1.5 py-0.5 border rounded text-[10px] font-mono ${cls}"
+          title="${title}">${o.name}${directMark}</button>`;
+      }
+      html += `</div></div>`;
+    }
+
+    if (mountOptions.length > 0) {
+      html += `<div class="mb-2 mt-3 pt-2 border-t border-stone-300 dark:border-stone-700">
+        <div class="font-bold uppercase text-[10px] tracking-wider text-amber-700 dark:text-amber-400 mb-1">Mounts</div>
+        <div class="flex flex-wrap gap-1">`;
+      for (const m of mountOptions) {
+        const isSel = selected.has(m.name);
+        const cls = isSel
+          ? "bg-amber-300 dark:bg-amber-800 border-amber-700"
+          : "bg-white dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-stone-700";
+        html += `<button data-att="${m.name}"
+          class="px-1.5 py-0.5 border border-stone-400 rounded text-[10px] font-mono ${cls}">${m.name}</button>`;
+      }
+      html += `</div></div>`;
+    } else {
+      html += `<div class="mt-3 pt-2 border-t border-stone-300 dark:border-stone-700 text-[10px] italic text-stone-500">
+        No rail mount slots.
+      </div>`;
+    }
+
+    container.innerHTML = html;
+
+    container
+      .querySelectorAll<HTMLButtonElement>("button[data-att]")
+      .forEach((btn) => {
+        btn.addEventListener("click", () => {
+          toggleAttachment(btn.dataset.att!, selected, onRender);
+        });
+      });
+  }
+
+  // ============ SINGLE MODE ============
+  const gunSel = document.getElementById("lo-gun") as HTMLSelectElement | null;
+  const listEl = document.getElementById("lo-list");
+  const statsEl = document.getElementById("lo-stats");
+  const warnEl = document.getElementById("lo-warnings");
+  const clearBtn = document.getElementById("lo-clear");
+
+  const selected = new Set<string>();
+
+  function currentGun() {
+    return findGun(gunSel?.value ?? GUNS[0].name);
+  }
+
+  function renderSingleList() {
+    if (!listEl) return;
+    renderAttachmentList(listEl, currentGun(), selected, renderSingleAll);
+  }
+
+  function renderSingleStats() {
+    if (!statsEl || !warnEl) return;
+    const g = currentGun();
+    const base = getBaseStats(g);
+    const after = computeLoadout(g, [...selected]);
+    const check = validateLoadout(g, [...selected]);
+
+    let html = "";
+    html += singleRow(
+      "Damage",
+      `${base.dmgMin.toFixed(2)}–${base.dmgMax.toFixed(2)}`,
+      `${after.dmgMin.toFixed(2)}–${after.dmgMax.toFixed(2)}`,
+      after.dmgMax - base.dmgMax,
+      false,
+    );
+    html += singleRow(
+      "Crit %",
+      base.crit.toFixed(1),
+      after.crit.toFixed(1),
+      after.crit - base.crit,
+      false,
+    );
+    html += singleRow(
+      "Crit ×",
+      base.critDmg.toFixed(2),
+      after.critDmg.toFixed(2),
+      after.critDmg - base.critDmg,
+      false,
+    );
+    html += singleRow(
+      "Hit",
+      base.hitChance.toFixed(1),
+      after.hitChance.toFixed(1),
+      after.hitChance - base.hitChance,
+      false,
+    );
+    html += singleRow(
+      "Aim",
+      base.aimTime.toFixed(1),
+      after.aimTime.toFixed(1),
+      after.aimTime - base.aimTime,
+      true,
+    );
+    html += singleRow(
+      "Range",
+      base.range.toFixed(1),
+      after.range.toFixed(1),
+      after.range - base.range,
+      false,
+    );
+    html += singleRow(
+      "Noise",
+      base.noise.toFixed(0),
+      after.noise.toFixed(0),
+      after.noise - base.noise,
+      true,
+    );
+    html += singleRow(
+      "Mag",
+      base.mag.toString(),
+      after.mag.toString(),
+      after.mag - base.mag,
+      false,
+    );
+    html += singleRow(
+      "Weight",
+      base.weight.toFixed(2),
+      after.weight.toFixed(2),
+      after.weight - base.weight,
+      true,
+    );
+
+    statsEl.innerHTML = html;
+
+    if (check.errors.length > 0) {
+      warnEl.innerHTML = `<div class="border-2 border-red-600 bg-red-50 dark:bg-red-900/30 p-2">
+        <div class="font-bold text-red-700 dark:text-red-400 text-xs uppercase mb-1">Conflicts</div>
+        <ul class="text-xs list-disc list-inside">${check.errors.map((e) => `<li>${e}</li>`).join("")}</ul>
+      </div>`;
+    } else {
+      warnEl.innerHTML = "";
+    }
+  }
+
+  function singleRow(
+    label: string,
+    base: string,
+    after: string,
+    delta: number,
+    lowerIsBetter: boolean,
+  ): string {
+    const hasChange = Math.abs(delta) > 0.001;
+    const good = lowerIsBetter ? delta < 0 : delta > 0;
+    const color = !hasChange
+      ? ""
+      : good
+        ? "text-green-700 dark:text-green-400"
+        : "text-red-700 dark:text-red-400";
+    const deltaStr = hasChange
+      ? (delta > 0 ? "+" : "") + delta.toFixed(2)
+      : "—";
+    return `<tr class="border-b border-stone-300 dark:border-stone-700">
+      <td class="p-2 font-bold">${label}</td>
+      <td class="p-2 num text-right font-mono">${base}</td>
+      <td class="p-2 num text-right font-mono ${color}">${after}</td>
+      <td class="p-2 num text-right font-mono ${color}">${deltaStr}</td>
+    </tr>`;
+  }
+
+  function renderSingleAll() {
+    try {
+      renderSingleList();
+    } catch (e) {
+      console.error("single list error", e);
+    }
+    try {
+      renderSingleStats();
+    } catch (e) {
+      console.error("single stats error", e);
+    }
+  }
+
+  gunSel?.addEventListener("change", () => {
+    selected.clear();
+    renderSingleAll();
+  });
+  clearBtn?.addEventListener("click", () => {
+    selected.clear();
+    renderSingleAll();
+  });
+
+  // ============ COMPARE MODE ============
+  const gunAEl = document.getElementById(
+    "cmp-gun-a",
+  ) as HTMLSelectElement | null;
+  const gunBEl = document.getElementById(
+    "cmp-gun-b",
+  ) as HTMLSelectElement | null;
+  const listAEl = document.getElementById("cmp-list-a");
+  const listBEl = document.getElementById("cmp-list-b");
+  const cmpStatsEl = document.getElementById("cmp-stats");
+  const cmpWarnEl = document.getElementById("cmp-warnings");
+
+  const selectedA = new Set<string>();
+  const selectedB = new Set<string>();
+
+  // Ensure Gun B is different from Gun A on first load
+  if (
+    gunAEl &&
+    gunBEl &&
+    gunAEl.value === gunBEl.value &&
+    gunBEl.options.length > 1
+  ) {
+    gunBEl.selectedIndex = 1;
+  }
+
+  function currentA() {
+    return findGun(gunAEl?.value ?? GUNS[0].name);
+  }
+  function currentB() {
+    return findGun(gunBEl?.value ?? GUNS[0].name);
+  }
+
+  function renderCompareLists() {
+    if (listAEl)
+      renderAttachmentList(listAEl, currentA(), selectedA, renderCompareAll);
+    if (listBEl)
+      renderAttachmentList(listBEl, currentB(), selectedB, renderCompareAll);
+  }
+
+  function renderCompareStats() {
+    if (!cmpStatsEl || !cmpWarnEl) return;
+    const a = currentA();
+    const b = currentB();
+    const statsA = computeLoadout(a, [...selectedA]);
+    const statsB = computeLoadout(b, [...selectedB]);
+
+    const checkA = validateLoadout(a, [...selectedA]);
+    const checkB = validateLoadout(b, [...selectedB]);
+    const allErrors = [
+      ...checkA.errors.map((e) => `Gun A: ${e}`),
+      ...checkB.errors.map((e) => `Gun B: ${e}`),
+    ];
+
+    if (allErrors.length > 0) {
+      cmpWarnEl.innerHTML = `<div class="border-2 border-red-600 bg-red-50 dark:bg-red-900/30 p-2">
+        <div class="font-bold text-red-700 dark:text-red-400 text-xs uppercase mb-1">Conflicts</div>
+        <ul class="text-xs list-disc list-inside">${allErrors.map((e) => `<li>${e}</li>`).join("")}</ul>
+      </div>`;
+    } else {
+      cmpWarnEl.innerHTML = "";
+    }
+
+    let html = "";
+    html += cmpRow(
+      "Damage (min–max)",
+      `${statsA.dmgMin.toFixed(2)}–${statsA.dmgMax.toFixed(2)}`,
+      `${statsB.dmgMin.toFixed(2)}–${statsB.dmgMax.toFixed(2)}`,
+      statsB.dmgMax - statsA.dmgMax,
+      false,
+    );
+    html += cmpRow(
+      "Crit %",
+      statsA.crit.toFixed(1),
+      statsB.crit.toFixed(1),
+      statsB.crit - statsA.crit,
+      false,
+    );
+    html += cmpRow(
+      "Crit ×",
+      statsA.critDmg.toFixed(2),
+      statsB.critDmg.toFixed(2),
+      statsB.critDmg - statsA.critDmg,
+      false,
+    );
+    html += cmpRow(
+      "Hit",
+      statsA.hitChance.toFixed(1),
+      statsB.hitChance.toFixed(1),
+      statsB.hitChance - statsA.hitChance,
+      false,
+    );
+    html += cmpRow(
+      "Aim",
+      statsA.aimTime.toFixed(1),
+      statsB.aimTime.toFixed(1),
+      statsB.aimTime - statsA.aimTime,
+      true,
+    );
+    html += cmpRow(
+      "Range",
+      statsA.range.toFixed(1),
+      statsB.range.toFixed(1),
+      statsB.range - statsA.range,
+      false,
+    );
+    html += cmpRow(
+      "Noise",
+      statsA.noise.toFixed(0),
+      statsB.noise.toFixed(0),
+      statsB.noise - statsA.noise,
+      true,
+    );
+    html += cmpRow(
+      "Mag",
+      statsA.mag.toString(),
+      statsB.mag.toString(),
+      statsB.mag - statsA.mag,
+      false,
+    );
+    html += cmpRow(
+      "Weight",
+      statsA.weight.toFixed(2),
+      statsB.weight.toFixed(2),
+      statsB.weight - statsA.weight,
+      true,
+    );
+
+    cmpStatsEl.innerHTML = html;
+  }
+
+  function cmpRow(
+    label: string,
+    a: string,
+    b: string,
+    delta: number,
+    lowerIsBetter: boolean,
+  ): string {
+    const hasChange = Math.abs(delta) > 0.001;
+    let color = "";
+    if (hasChange) {
+      const bIsBetter = lowerIsBetter ? delta < 0 : delta > 0;
+      color = bIsBetter
+        ? "text-green-700 dark:text-green-400"
+        : "text-red-700 dark:text-red-400";
+    }
+    const deltaStr = hasChange
+      ? (delta > 0 ? "+" : "") + delta.toFixed(2)
+      : "—";
+    return `<tr class="border-b border-stone-300 dark:border-stone-700">
+      <td class="p-2 font-bold">${label}</td>
+      <td class="p-2 num text-right font-mono">${a}</td>
+      <td class="p-2 num text-right font-mono">${b}</td>
+      <td class="p-2 num text-right font-mono ${color}">${deltaStr}</td>
+    </tr>`;
+  }
+
+  function renderCompareAll() {
+    try {
+      renderCompareLists();
+    } catch (e) {
+      console.error("compare lists error", e);
+    }
+    try {
+      renderCompareStats();
+    } catch (e) {
+      console.error("compare stats error", e);
+    }
+  }
+
+  gunAEl?.addEventListener("change", () => {
+    selectedA.clear();
+    renderCompareAll();
+  });
+  gunBEl?.addEventListener("change", () => {
+    selectedB.clear();
+    renderCompareAll();
+  });
+
+  document.getElementById("cmp-clear-a")?.addEventListener("click", () => {
+    selectedA.clear();
+    renderCompareAll();
+  });
+  document.getElementById("cmp-clear-b")?.addEventListener("click", () => {
+    selectedB.clear();
+    renderCompareAll();
+  });
+
+  // ============ INITIAL RENDER ============
+  renderSingleAll();
+  renderCompareAll();
+</script>

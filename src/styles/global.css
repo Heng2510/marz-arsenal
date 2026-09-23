@@ -36,7 +36,7 @@ body {
 
 [hidden] { display: none !important; }
 
-/* ---------- NUMERIC COLUMN: KHÔNG XUỐNG DÒNG ---------- */
+/* ---------- NUMERIC COLUMN ---------- */
 td.num, th.num { white-space: nowrap; }
 
 /* ---------- ATTACHMENT COLUMNS ---------- */
@@ -80,7 +80,7 @@ html.dark .ammo-9x39    { background: #2e1a4a; border-color: #9333ea; color: #f3
 html.dark .ammo-12g     { background: #4a1a24; border-color: #e11d48; color: #ffe4e6; }
 html.dark .ammo-40mm    { background: #3a1240; border-color: #c026d3; color: #fae8ff; }
 
-/* ---------- DARK OVERRIDES CHO TAILWIND CLASS ---------- */
+/* ---------- DARK OVERRIDES FOR TAILWIND CLASS ---------- */
 html.dark .bg-white       { background: #201d19 !important; }
 html.dark .bg-stone-100   { background: #201d19 !important; }
 html.dark .bg-stone-200   { background: #2a2620 !important; }

@@ -1,15 +1,16 @@
 ---
 import { GUNS } from '../data/guns';
 import { AMMO_INFO } from '../data/ammo';
+
 const ammoKeys = Object.keys(AMMO_INFO);
 const categories = [...new Set(GUNS.map(g => g.category))].sort();
 ---
 <div class="border-2 border-stone-800 dark:border-stone-200 bg-stone-100 dark:bg-stone-900 p-3 mb-4 flex flex-wrap gap-3 items-end text-sm">
   <label class="flex flex-col text-xs">
-    <span class="font-bold uppercase mb-1">Ammo type</span>
+    <span class="font-bold uppercase mb-1">Ammo family</span>
     <select id="f-ammo" class="border border-stone-500 px-2 py-1 min-w-[180px]">
       <option value="">All</option>
-      {ammoKeys.map(k => <option value={k}>{AMMO_INFO[k as keyof typeof AMMO_INFO].label}</option>)}
+      {ammoKeys.map(k => <option value={k}>{AMMO_INFO[k as keyof typeof AMMO_INFO].label} — {AMMO_INFO[k as keyof typeof AMMO_INFO].long}</option>)}
     </select>
   </label>
   <label class="flex flex-col text-xs">
@@ -37,7 +38,8 @@ const categories = [...new Set(GUNS.map(g => g.category))].sort();
     const q    = ($('#f-q') as HTMLInputElement).value.trim().toLowerCase();
     let visible = 0;
     document.querySelectorAll<HTMLTableRowElement>('#guns-tbody tr').forEach(tr => {
-      const ok = (!ammo || tr.dataset.ammo === ammo)
+      const fams = (tr.dataset.ammo || '').split(',').filter(Boolean);
+      const ok = (!ammo || fams.includes(ammo))
               && (!cat  || tr.dataset.cat  === cat)
               && (!q    || (tr.dataset.name || '').toLowerCase().includes(q));
       tr.hidden = !ok;
