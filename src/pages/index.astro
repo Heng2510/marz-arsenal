@@ -9,7 +9,7 @@ import LoadoutTab from "../components/LoadoutTab.astro";
 import { GUNS } from "../data/guns";
 import { AMMO_INFO } from "../data/ammo";
 import { GUN_META } from "../data/gun-meta";
-import { SCORED_GUNS, PROFILES } from "../lib/scoring";
+import { SCORED_GUNS, PROFILES, expectedDamage } from "../lib/scoring";
 
 // Pre-computed scored guns (includes per-profile score + global rank)
 const scoredGuns = SCORED_GUNS;
@@ -93,7 +93,7 @@ const ammoKeys = Object.keys(AMMO_INFO);
 			</h2>
 			<p class="text-xs italic text-stone-600 dark:text-stone-400 mt-1">
 				Ranked by the selected profile. Filters do not change global
-				rank.
+				rank. Click any header to sort.
 			</p>
 		</div>
 
@@ -165,9 +165,10 @@ const ammoKeys = Object.keys(AMMO_INFO);
 					<col style="width:50px" />
 					<col style="width:140px" />
 					<col style="width:90px" />
-					<col style="width:150px" />
+					<col style="width:90px" />
 					<col style="width:70px" />
-					<col style="width:80px" />
+					<col style="width:70px" />
+					<col style="width:70px" />
 					<col style="width:70px" />
 					<col style="width:60px" />
 					<col style="width:70px" />
@@ -180,19 +181,171 @@ const ammoKeys = Object.keys(AMMO_INFO);
 					class="bg-stone-800 dark:bg-stone-200 text-stone-50 dark:text-stone-900"
 				>
 					<tr>
-						<th class="p-2 text-right">#</th>
-						<th class="p-2 text-left">Gun</th>
-						<th class="p-2 text-left">Type</th>
-						<th class="p-2 text-left">Ammo</th>
-						<th class="p-2 text-right">Score</th>
-						<th class="p-2 text-right">Bal. Rank</th>
-						<th class="p-2 text-right">DMG</th>
-						<th class="p-2 text-right">Crit%</th>
-						<th class="p-2 text-right">Range</th>
-						<th class="p-2 text-right">Noise</th>
-						<th class="p-2 text-right">Aim</th>
-						<th class="p-2 text-right">Wt</th>
-						<th class="p-2 text-right">Attach</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="rank"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>#<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="rank">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-left cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="name"
+						>
+							<span class="inline-flex items-center gap-1"
+								>Gun<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="name">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-left cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="category"
+						>
+							<span class="inline-flex items-center gap-1"
+								>Type<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="category">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-left cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="ammo"
+						>
+							<span class="inline-flex items-center gap-1"
+								>Ammo<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="ammo">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="score"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Score<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="score">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="balancedRank"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Bal. Rank<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="balancedRank">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="dmgMax"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>DMG<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="dmgMax">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="expDmg"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Exp. DMG<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="expDmg">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="crit"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Crit%<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="crit">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="range"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Range<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="range">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="noise"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Noise<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="noise">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="aimTime"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Aim<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="aimTime">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="weight"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Wt<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="weight">▼</span
+								></span
+							>
+						</th>
+						<th
+							class="p-2 text-right cursor-pointer select-none hover:bg-stone-700 dark:hover:bg-stone-300"
+							data-r-sort-key="attach"
+						>
+							<span
+								class="inline-flex items-center gap-1 justify-end"
+								>Attach<span
+									class="r-sort-icon text-[10px] opacity-40"
+									data-r-icon="attach">▼</span
+								></span
+							>
+						</th>
 					</tr>
 				</thead>
 				<tbody id="rank-tbody">
@@ -211,6 +364,18 @@ const ammoKeys = Object.keys(AMMO_INFO);
 									data-ammo={g.ammoFamilies.join(",")}
 									data-scores={JSON.stringify(g.scores)}
 									data-ranks={JSON.stringify(g.globalRanks)}
+									data-dmg-max={g.dmgMax}
+									data-exp-dmg={expectedDamage(
+										g.dmgMax,
+										g.crit,
+										g.critDmg,
+									).toFixed(3)}
+									data-crit={g.crit}
+									data-range={g.range}
+									data-noise={g.noise}
+									data-aim={g.aimTime}
+									data-weight={g.weight}
+									data-attach={meta.attachCount ?? 0}
 								>
 									<td class="p-2 num text-right font-mono font-bold rank-cell">
 										—
@@ -255,6 +420,13 @@ const ammoKeys = Object.keys(AMMO_INFO);
 										{g.dmgMax}
 									</td>
 									<td class="p-2 num text-right font-mono">
+										{expectedDamage(
+											g.dmgMax,
+											g.crit,
+											g.critDmg,
+										).toFixed(2)}
+									</td>
+									<td class="p-2 num text-right font-mono">
 										{g.crit}
 									</td>
 									<td class="p-2 num text-right font-mono">
@@ -283,7 +455,7 @@ const ammoKeys = Object.keys(AMMO_INFO);
 </Base>
 
 <script>
-	// ---------- RANKING: client-side filter + sort by profile ----------
+	// ---------- RANKING: filter + sort (profile score by default, manual on click) ----------
 	const rProfile = document.getElementById(
 		"r-profile",
 	) as HTMLSelectElement | null;
@@ -291,25 +463,80 @@ const ammoKeys = Object.keys(AMMO_INFO);
 	const rAmmo = document.getElementById("r-ammo") as HTMLSelectElement | null;
 	const rQ = document.getElementById("r-q") as HTMLInputElement | null;
 	const rCount = document.getElementById("r-count");
-	const tbody = document.getElementById("rank-tbody");
+	const rankTbody = document.getElementById("rank-tbody");
+
+	// Manual sort state: 0 = off, 1 = asc, 2 = desc
+	let rCurrentKey: string | null = null;
+	const rSortState: Record<string, 0 | 1 | 2> = {};
+
+	function rUpdateIcons() {
+		document
+			.querySelectorAll<HTMLElement>("[data-r-icon]")
+			.forEach((el) => {
+				const key = el.dataset.rIcon!;
+				const state = key === rCurrentKey ? rSortState[key] || 0 : 0;
+				if (state === 1) {
+					el.textContent = "▲";
+					el.style.opacity = "1";
+				} else if (state === 2) {
+					el.textContent = "▼";
+					el.style.opacity = "1";
+				} else {
+					el.textContent = "▼";
+					el.style.opacity = "0.4";
+				}
+			});
+	}
+
+	function rGetValue(tr: HTMLTableRowElement, key: string): string | number {
+		if (key === "rank") {
+			const cell = tr.querySelector(".rank-cell");
+			return parseInt(cell?.textContent ?? "999", 10) || 999;
+		}
+		if (key === "score") {
+			const profile = rProfile?.value ?? "balanced";
+			return JSON.parse(tr.dataset.scores || "{}")[profile] ?? 0;
+		}
+		if (key === "balancedRank") {
+			return JSON.parse(tr.dataset.ranks || "{}")["balanced"] ?? 999;
+		}
+		if (key === "name") return (tr.dataset.name || "").toLowerCase();
+		if (key === "category") return tr.dataset.cat || "";
+		if (key === "ammo") return tr.dataset.ammo || "";
+		const map: Record<string, string> = {
+			dmgMax: "dmgMax",
+			expDmg: "expDmg",
+			crit: "crit",
+			range: "range",
+			noise: "noise",
+			aimTime: "aim",
+			weight: "weight",
+			attach: "attach",
+		};
+		const attr = map[key];
+		if (attr) return parseFloat(tr.dataset[attr] || "0") || 0;
+		return 0;
+	}
 
 	function applyRank() {
-		if (!tbody || !rCount) return;
+		if (!rankTbody || !rCount) return;
 		const profile = rProfile?.value ?? "balanced";
 		const cat = rCat?.value ?? "";
 		const ammo = rAmmo?.value ?? "";
 		const q = (rQ?.value ?? "").trim().toLowerCase();
 
 		const rows = Array.from(
-			tbody.querySelectorAll<HTMLTableRowElement>("tr"),
+			rankTbody.querySelectorAll<HTMLTableRowElement>("tr"),
 		);
 
-		// Sort rows by score of the selected profile (descending)
-		rows.sort((a, b) => {
-			const sa = JSON.parse(a.dataset.scores || "{}")[profile] ?? 0;
-			const sb = JSON.parse(b.dataset.scores || "{}")[profile] ?? 0;
-			return sb - sa;
-		});
+		// Default sort: profile score descending. Only when no manual sort is active.
+		if (!rCurrentKey) {
+			rows.sort((a, b) => {
+				const sa = JSON.parse(a.dataset.scores || "{}")[profile] ?? 0;
+				const sb = JSON.parse(b.dataset.scores || "{}")[profile] ?? 0;
+				return sb - sa;
+			});
+		}
 
 		let visible = 0;
 		for (const tr of rows) {
@@ -324,32 +551,75 @@ const ammoKeys = Object.keys(AMMO_INFO);
 
 			tr.hidden = !ok;
 
-			// "#" column = global rank for the current profile (never resets on filter)
 			const rankCell = tr.querySelector(".rank-cell") as HTMLElement;
 			if (rankCell) rankCell.textContent = String(ranks[profile] ?? "—");
 
-			// Profile score cell (multiplied by 100 for readability)
 			const scoreCell = tr.querySelector(".score-cell") as HTMLElement;
 			if (scoreCell) {
 				const s = scores[profile] ?? 0;
 				scoreCell.textContent = (s * 100).toFixed(1);
 			}
 
-			// Balanced rank column is static — useful as a reference point
 			const balCell = tr.querySelector(
 				".rank-balanced-cell",
 			) as HTMLElement;
 			if (balCell) balCell.textContent = String(ranks["balanced"] ?? "—");
 
 			if (ok) visible++;
-			tbody.appendChild(tr);
+			rankTbody.appendChild(tr);
 		}
 		rCount.textContent = String(visible);
+		rUpdateIcons();
 	}
 
-	rProfile?.addEventListener("change", applyRank);
+	// Manual sort: 3-click cycle asc → desc → reset (back to profile sort)
+	document
+		.querySelectorAll<HTMLTableCellElement>("[data-r-sort-key]")
+		.forEach((th) => {
+			th.addEventListener("click", () => {
+				if (!rankTbody) return;
+				const key = th.dataset.rSortKey!;
+
+				if (rCurrentKey && rCurrentKey !== key)
+					rSortState[rCurrentKey] = 0;
+
+				const cur = rSortState[key] || 0;
+				const next: 0 | 1 | 2 = cur === 0 ? 1 : cur === 1 ? 2 : 0;
+				rSortState[key] = next;
+				rCurrentKey = key;
+
+				if (next === 0) {
+					rCurrentKey = null;
+					applyRank();
+					return;
+				}
+
+				const rows = Array.from(
+					rankTbody.querySelectorAll<HTMLTableRowElement>("tr"),
+				);
+				rows.sort((a, b) => {
+					const va = rGetValue(a, key);
+					const vb = rGetValue(b, key);
+					let cmp = 0;
+					if (typeof va === "number" && typeof vb === "number")
+						cmp = va - vb;
+					else cmp = String(va).localeCompare(String(vb));
+					return next === 1 ? cmp : -cmp;
+				});
+				rows.forEach((r) => rankTbody.appendChild(r));
+				rUpdateIcons();
+			});
+		});
+
+	// Profile change → reset manual sort
+	rProfile?.addEventListener("change", () => {
+		rCurrentKey = null;
+		Object.keys(rSortState).forEach((k) => (rSortState[k] = 0));
+		applyRank();
+	});
 	rCat?.addEventListener("change", applyRank);
 	rAmmo?.addEventListener("change", applyRank);
 	rQ?.addEventListener("input", applyRank);
+
 	applyRank();
 </script>
